@@ -4,6 +4,7 @@ on:
     branches: [vision/fr-gl03-22-oidc-integration-review]
     paths:
       - 'integration/**'
+      - 'FR-GL03-19/source/**'
       - '.github/workflows/oidc-versioned-integration.yml'
   workflow_dispatch:
 permissions:
