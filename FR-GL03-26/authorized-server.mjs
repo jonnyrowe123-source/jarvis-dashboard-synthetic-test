@@ -10,7 +10,7 @@ export function makeFictionalAuthorizedServer({oidc, origin='http://localhost:41
  const authenticator=createOidcAuthenticator(oidc);
  const allowed=new URL(origin);
  if(!['http:','https:'].includes(allowed.protocol)||allowed.origin!==origin||allowed.username||allowed.password) throw Error('Invalid origin');
- if(!adapter||typeof adapter.getDashboard!=='function'||!Number.isInteger(adapterTimeoutMs)||adapterTimeoutMs<1||adapterTimeoutMs>10000||!Number.isInteger(maxInFlight)||maxInFlight<1||maxInFlight>128) throw Error('Invalid configuration');
+ if(!readPolicy||typeof readPolicy.read!=='function'||!Number.isInteger(adapterTimeoutMs)||adapterTimeoutMs<1||adapterTimeoutMs>10000||!Number.isInteger(maxInFlight)||maxInFlight<1||maxInFlight>128) throw Error('Invalid configuration');
  let inFlight=0;
  const server=createServer({maxHeaderSize:8192,headersTimeout:5000,requestTimeout:10000,keepAliveTimeout:1000,connectionsCheckingInterval:1000},async(req,res)=>{
   const headers={'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer','Content-Security-Policy':"default-src 'none'; frame-ancestors 'none'",'X-Frame-Options':'DENY','Cross-Origin-Resource-Policy':'same-origin','Vary':'Origin'};
