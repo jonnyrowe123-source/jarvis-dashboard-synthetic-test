@@ -58,3 +58,68 @@ test("26.10 policy exposes no mutation or write method",()=>{
 test("26.11 authenticated but unrecognised principal is never an empty success",async()=>{
  await assert.rejects(()=>policy().read({principal:principal("fictional-outside")}),TypeError);
 });
+
+// Both ACL and tenant must authorize access. Naming Alice in a blue ACL must
+// never let a caller's later configuration edits grant cross-tenant access.
+const sharedAclSource={async getDashboard(){
+ const snapshot=await fictionalRows.getDashboard();
+ snapshot.actions[1].acl.subjects.push("fictional-alice");
+ return snapshot;
+}};
+const assertAlice=async p=>{
+ const result=await p.read({principal:principal("fictional-alice")});
+ assert.deepEqual(result.actions.map(x=>x.id),["PUBLIC_A2","PUBLIC_A1"]);
+ assert.deepEqual(result.decisions.map(x=>x.id),["PUBLIC_D1"]);
+ assert.deepEqual(result.warnings,[]);
+ assert.equal(JSON.stringify(result).includes("privateNotes"),false);
+};
+test("26A.1 post-construction edits, deletions and additions cannot change authorization",async()=>{
+ const subjectTenants={...fictionalTenants};
+ const p=createFictionalReadPolicy({snapshotSource:sharedAclSource,subjectTenants});
+ subjectTenants["fictional-alice"]="tenant-blue";
+ delete subjectTenants["fictional-bob"];
+ subjectTenants["fictional-mallory"]="tenant-blue";
+ await assertAlice(p);
+ assert.deepEqual((await p.read({principal:principal("fictional-bob")})).actions.map(x=>x.id),["BLUE_A1"]);
+ await assert.rejects(()=>p.read({principal:principal("fictional-mallory")}),TypeError);
+ Object.defineProperty(subjectTenants,"fictional-alice",{get(){throw Error("caller getter must not run")}});
+ await assertAlice(p);
+});
+test("26A.2 mutation while snapshot is pending cannot switch tenant",async()=>{
+ const subjectTenants={...fictionalTenants};
+ let release,entered;
+ const pending=new Promise(resolve=>{release=resolve});
+ const started=new Promise(resolve=>{entered=resolve});
+ const p=createFictionalReadPolicy({subjectTenants,snapshotSource:{async getDashboard(){entered();await pending;return sharedAclSource.getDashboard()}}});
+ const read=p.read({principal:principal("fictional-alice")});
+ await started;
+ subjectTenants["fictional-alice"]="tenant-blue";
+ subjectTenants["fictional-bob"]="tenant-red";
+ release();
+ assert.deepEqual((await read).actions.map(x=>x.id),["PUBLIC_A2","PUBLIC_A1"]);
+ await assertAlice(p);
+ assert.deepEqual((await p.read({principal:principal("fictional-bob")})).actions.map(x=>x.id),["BLUE_A1"]);
+});
+test("26A.3 invalid initial mappings fail at construction without reading source or getters",()=>{
+ let reads=0,getters=0;
+ const snapshotSource={getDashboard(){reads++;throw Error("must not read")}};
+ const accessor={...fictionalTenants};
+ Object.defineProperty(accessor,"fictional-alice",{get(){getters++;return "tenant-red"}});
+ const hiddenSymbol={...fictionalTenants,[Symbol("extra")]:"tenant-blue"};
+ for(const subjectTenants of [undefined,null,[],new Map(),{},
+  {"fictional-alice":"tenant-red"},{...fictionalTenants,extra:"tenant-red"},
+  Object.create(fictionalTenants),Object.assign(Object.create(null),fictionalTenants),
+  hiddenSymbol,accessor,...["", "tenant red", "x".repeat(65),null,42,{},["tenant-red"]].map(value=>({...fictionalTenants,"fictional-alice":value})),
+  {...fictionalTenants,"fictional-bob":undefined}]){
+  assert.throws(()=>createFictionalReadPolicy({snapshotSource,subjectTenants}),TypeError);
+ }
+ assert.equal(reads,0);assert.equal(getters,0);
+});
+test("26A.4 construction captures values without freezing the caller's object",async()=>{
+ const subjectTenants={...fictionalTenants};
+ const p=createFictionalReadPolicy({snapshotSource:fictionalRows,subjectTenants});
+ assert.equal(Object.isFrozen(subjectTenants),false);
+ await assertAlice(p);
+ assert.deepEqual((await p.read({principal:principal("fictional-bob")})).actions.map(x=>x.id),["BLUE_A1"]);
+ assert.deepEqual((await p.read({principal:principal("fictional-alice"),view:"lenovo"})).actions.map(x=>x.id),["PUBLIC_A1"]);
+});

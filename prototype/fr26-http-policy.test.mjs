@@ -91,3 +91,41 @@ test("26.22 successful, denied and malformed requests are not cacheable",()=>wit
   assert.equal(response.headers.get("cache-control"),"no-store");
  }
 }));
+
+test("26A.5 HTTP policy retains tenant isolation after caller mutates mapping",async()=>{
+ const subjectTenants={...fictionalTenants};
+ const readPolicy=createFictionalReadPolicy({subjectTenants,snapshotSource:{async getDashboard(){
+  const snapshot=await fictionalRows.getDashboard();
+  snapshot.actions[1].acl.subjects.push("fictional-alice");
+  return snapshot;
+ }}});
+ subjectTenants["fictional-alice"]="tenant-blue";
+ subjectTenants["fictional-bob"]="tenant-red";
+ await withApi(async({base,issuer})=>{
+  for(const [subject,expected] of [["fictional-alice",["PUBLIC_A2","PUBLIC_A1"]],["fictional-bob",["BLUE_A1"]]]){
+   const response=await get(base,await issuer.sign({sub:subject}));
+   assert.equal(response.status,200);
+   assert.deepEqual((await response.json()).actions.map(x=>x.id),expected);
+  }
+ },readPolicy);
+});
+test("26A.6 inherited strict CORS preflight and authenticated GET remain intact",()=>withApi(async({base,issuer})=>{
+ const origin="http://localhost:4173";
+ const preflight=(query,changes={})=>fetch(base+"/v1/dashboard"+query,{method:"OPTIONS",headers:{Origin:origin,"Access-Control-Request-Method":"GET","Access-Control-Request-Headers":"Authorization",...changes}});
+ for(const query of ["","?view=overall","?view=10min","?view=lenovo"]){
+  const response=await preflight(query);
+  assert.equal(response.status,204);assert.equal(await response.text(),"");
+  assert.equal(response.headers.get("access-control-allow-origin"),origin);
+  assert.equal(response.headers.get("access-control-allow-methods"),"GET");
+  assert.equal(response.headers.get("access-control-allow-headers"),"Authorization");
+ }
+ for(const query of ["?view=%6fverall","?view=overall&view=lenovo","?view=bad","?view="])
+  assert.equal((await preflight(query)).status,403);
+ for(const changes of [{Origin:"https://untrusted.invalid"},{"Access-Control-Request-Method":"POST"},{"Access-Control-Request-Headers":"Authorization,X-Debug"}])
+  assert.equal((await preflight("?view=overall",changes)).status,403);
+ const unauthenticated=await fetch(base+"/v1/dashboard",{headers:{Origin:origin}});
+ assert.equal(unauthenticated.status,401);
+ const response=await fetch(base+"/v1/dashboard",{headers:{Origin:origin,Authorization:"Bearer "+await issuer.sign()}});
+ assert.equal(response.status,200);assert.equal(response.headers.get("access-control-allow-origin"),origin);
+ assert.deepEqual((await response.json()).actions.map(x=>x.id),["PUBLIC_A2","PUBLIC_A1"]);
+}));

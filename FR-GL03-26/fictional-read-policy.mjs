@@ -10,12 +10,23 @@ function checkPrincipal(p){if(!keys(p,["issuer","subject","clientId","permission
 function checkAcl(a){if(!keys(a,["tenant","subjects"])||!identity(a.tenant)||!Array.isArray(a.subjects)||!a.subjects.length||a.subjects.length>8||new Set(a.subjects).size!==a.subjects.length||!a.subjects.every(identity))fail()}
 function checkRow(row){if(!keys(row,["tenant","acl","kind","record"])||!identity(row.tenant)||!["action","decision"].includes(row.kind))fail();checkAcl(row.acl);if(row.acl.tenant!==row.tenant)fail();}
 export function createFictionalReadPolicy({snapshotSource,subjectTenants}={}){
- if(!snapshotSource||typeof snapshotSource.getDashboard!=="function"||!keys(subjectTenants,["fictional-alice","fictional-bob"])||!identity(subjectTenants["fictional-alice"])||!identity(subjectTenants["fictional-bob"]))throw new TypeError("Explicit fictional policy required");
+ if(!snapshotSource||typeof snapshotSource.getDashboard!=="function"||!keys(subjectTenants,["fictional-alice","fictional-bob"]))throw new TypeError("Explicit fictional policy required");
+ // Accept only own data properties; never retain caller-owned authorization state
+ // or execute getters that can return different tenants at validation and use.
+ const descriptors=Object.getOwnPropertyDescriptors(subjectTenants);
+ const tenants={};
+ for(const subject of ["fictional-alice","fictional-bob"]){
+  const descriptor=descriptors[subject];
+  if(!OWN.call(descriptor,"value")||!identity(descriptor.value))throw new TypeError("Explicit fictional policy required");
+  tenants[subject]=descriptor.value;
+ }
+ Object.freeze(tenants);
  return Object.freeze({async read({principal,view="overall"}={}){
   checkPrincipal(principal);
   // An authenticated but unknown subject must be denied, not treated as an empty dashboard.
-  if(!Object.hasOwn(subjectTenants,principal.subject))fail();
+  if(!Object.hasOwn(tenants,principal.subject))fail();
   if(!["overall","10min","lenovo"].includes(view))fail();
+  const tenant=tenants[principal.subject];
   const source=await snapshotSource.getDashboard();
   if(!keys(source,["revision","actions","decisions","warnings"])||typeof source.revision!=="string"||!Array.isArray(source.actions)||!Array.isArray(source.decisions)||!Array.isArray(source.warnings))fail();
   if(source.actions.length>100||source.decisions.length>100||source.warnings.length>100)fail();
@@ -26,7 +37,6 @@ export function createFictionalReadPolicy({snapshotSource,subjectTenants}={}){
    if(!row.record||typeof row.record.id!=="string"||ids.has(row.record.id))fail();
    ids.add(row.record.id);
    if(!identity(row.record.id))fail();
-   const tenant=subjectTenants[principal.subject];
    const permitted=tenant===row.tenant&&row.acl.subjects.includes(principal.subject);
    if(!permitted)continue;
    if(row.kind==="action"){
