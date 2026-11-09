@@ -1,0 +1,56 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import {createFictionalReadPolicy,fictionalRows,fictionalTenants} from "../FR-GL03-26/fictional-read-policy.mjs";
+const principal=(subject)=>({issuer:"http://127.0.0.1:45123",subject,clientId:"fictional-client",permissions:["dashboard:read"]});
+const policy=()=>createFictionalReadPolicy({snapshotSource:fictionalRows,subjectTenants:fictionalTenants});
+test("26.1 exact permitted records appear in original order with metadata",async()=>{
+ const r=await policy().read({principal:principal("fictional-alice")});
+ assert.equal(r.schemaVersion,1);assert.equal(r.revision,"fictional-revision-7");
+ assert.deepEqual(r.actions.map(a=>a.id),["PUBLIC_A2","PUBLIC_A1"]);
+ assert.deepEqual(r.actions.map(a=>a.revision),[4,3]);
+ assert.deepEqual(r.decisions.map(d=>d.id),["PUBLIC_D1"]);
+ assert.deepEqual(r.warnings,[]);
+ assert.equal(JSON.stringify(r).includes("privateNotes"),false);
+});
+test("26.2 tenant isolation prevents blue records leaking to Alice",async()=>{
+ const r=await policy().read({principal:principal("fictional-alice")});
+ assert.equal(JSON.stringify(r).includes("BLUE_A1"),false);
+ assert.equal(JSON.stringify(r).includes("do not disclose"),false);
+});
+test("26.3 blue tenant sees blue record only",async()=>{
+ const r=await policy().read({principal:principal("fictional-bob")});
+ assert.deepEqual(r.actions.map(a=>a.id),["BLUE_A1"]);
+ assert.equal(r.decisions.length,0);
+});
+test("26.4 scoped filters are applied after authorization",async()=>{
+ const ten=await policy().read({principal:principal("fictional-alice"),view:"10min"});
+ const len=await policy().read({principal:principal("fictional-alice"),view:"lenovo"});
+ assert.deepEqual(ten.actions.map(a=>a.id),["PUBLIC_A2"]);
+ assert.deepEqual(len.actions.map(a=>a.id),["PUBLIC_A1"]);
+ assert.equal(ten.decisions.length,1);
+});
+test("26.5 missing or mismatched subject fails closed",async()=>{
+ for(const p of [null,{},principal("fictional-mallory"),{...principal("fictional-alice"),permissions:[]}, {...principal("fictional-alice"),permissions:["dashboard:write"]}])
+  await assert.rejects(()=>policy().read({principal:p}),TypeError);
+});
+test("26.6 cross-tenant ACL inconsistency is rejected",async()=>{
+ const source={getDashboard:async()=>{
+ const s=await fictionalRows.getDashboard();s.actions[0].acl.tenant="tenant-blue";return s;}};
+ await assert.rejects(()=>createFictionalReadPolicy({snapshotSource:source,subjectTenants:fictionalTenants}).read({principal:principal("fictional-alice")}),TypeError);
+});
+test("26.7 duplicate IDs are rejected even when the duplicate would be hidden",async()=>{
+ const source={getDashboard:async()=>{
+ const s=await fictionalRows.getDashboard();s.actions[1].record.id=s.actions[0].record.id;return s;}};
+ await assert.rejects(()=>createFictionalReadPolicy({snapshotSource:source,subjectTenants:fictionalTenants}).read({principal:principal("fictional-alice")}),TypeError);
+});
+test("26.8 unexpected canonical data fields are refused, not silently projected",async()=>{
+ const source={getDashboard:async()=>{const s=await fictionalRows.getDashboard();s.actions[0].record.secretField="never";return s;}};
+ await assert.rejects(()=>createFictionalReadPolicy({snapshotSource:source,subjectTenants:fictionalTenants}).read({principal:principal("fictional-alice")}),TypeError);
+});
+test("26.9 output does not expose ACL information or source tenancy",async()=>{
+ const r=await policy().read({principal:principal("fictional-alice")});
+ for(const field of ["tenant","subjects","acl","privateNotes","tenant-red","tenant-blue"])assert.equal(JSON.stringify(r).includes(field),false);
+});
+test("26.10 policy exposes no mutation or write method",()=>{
+ const p=policy();assert.deepEqual(Object.keys(p),["read"]);assert.equal(p.write,undefined);assert.equal(p.transitionAction,undefined);
+});
