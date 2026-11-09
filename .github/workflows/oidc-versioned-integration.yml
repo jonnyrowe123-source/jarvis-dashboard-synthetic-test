@@ -1,0 +1,29 @@
+name: FR-GL03-23 isolated OIDC + versioned DTO integration
+on:
+  push:
+    branches: [vision/fr-gl03-22-oidc-integration-review]
+    paths:
+      - 'integration/**'
+      - '.github/workflows/oidc-versioned-integration.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  oidc-versioned:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install pinned dependency in isolated candidate only
+        working-directory: FR-GL03-19/source
+        run: npm ci --ignore-scripts
+      - name: Codex immutable prototype regression
+        working-directory: FR-GL03-19/source
+        run: npm test
+      - name: Vision authenticated versioned DTO integration
+        run: node --test integration/*.test.mjs
+      - name: Existing Vision regression
+        run: node --test prototype/*.test.mjs
