@@ -1,0 +1,41 @@
+import { chromium } from "playwright";
+import { spawn } from "node:child_process";
+import assert from "node:assert/strict";
+const server=spawn("python3",["-m","http.server","8765","--bind","127.0.0.1"],{stdio:"ignore"});
+let browser;
+const url="http://127.0.0.1:8765/synthetic-preview.html";
+const wait=async()=>{for(let i=0;i<40;i++){try{const r=await fetch(url);if(r.ok)return}catch{}await new Promise(r=>setTimeout(r,150))}throw Error("Local preview server unavailable")};
+try{
+ await wait();browser=await chromium.launch({headless:true});
+ const page=await browser.newPage({viewport:{width:1280,height:800}});
+ const errors=[];page.on("pageerror",err=>errors.push(err.message));
+ await page.goto(url,{waitUntil:"networkidle"});
+ await page.locator("#status[data-status=ready]").waitFor();
+ assert.equal(await page.locator("#actions li").count(),2);
+ assert.equal(await page.locator("#decisions li").count(),1);
+ console.log("PASS: initial synthetic read-only view");
+ await page.locator("#view").selectOption("lenovo");
+ await page.locator("#status[data-status=ready]").waitFor();
+ assert.equal(await page.locator("#actions li").count(),1);
+ assert.match(await page.locator("#actions").innerText(),/Inspect/);
+ console.log("PASS: Lenovo context filter");
+ await page.locator("#view").selectOption("10min");
+ await page.locator("#status[data-status=ready]").waitFor();
+ assert.equal(await page.locator("#actions li").count(),1);
+ console.log("PASS: 10 minute context filter");
+ await page.locator("#offline").click();
+ await page.locator("#status[data-status=error]").waitFor();
+ assert.equal(await page.locator("#actions li").count(),1); // empty placeholder only
+ assert.match(await page.locator("#actions").innerText(),/No actions/);
+ console.log("PASS: outage clears prior records");
+ await page.locator("#refresh").click();
+ await page.locator("#status[data-status=ready]").waitFor();
+ await page.locator("#invalidate").click();
+ await page.locator("#status[data-status=stale]").waitFor();
+ assert.match(await page.locator("#actions").innerText(),/No actions/);
+ console.log("PASS: stale invalidation clears records");
+ assert.equal(await page.locator("button").count(),3);
+ assert.equal(errors.length,0,"Browser console errors: "+errors.join("; "));
+ await page.screenshot({path:"synthetic-preview-acceptance.png",fullPage:true});
+ console.log("PASS: no runtime errors, screenshot captured");
+}finally{await browser?.close();server.kill()}
