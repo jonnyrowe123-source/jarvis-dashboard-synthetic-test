@@ -1,0 +1,12 @@
+import test from "node:test";import assert from "node:assert/strict";import {createDashboardGateway} from "./dashboard-gateway.mjs";
+const baseUrl="https://api.example.test/";
+const ok=()=>new Response(JSON.stringify({revision:"r1",actions:[],decisions:[],warnings:[]}),{status:200,headers:{"content-type":"application/json"}});
+test("rejects non-TLS origin",()=>assert.throws(()=>createDashboardGateway({baseUrl:"http://api.example.test"})));
+test("rejects URL credentials",()=>assert.throws(()=>createDashboardGateway({baseUrl:"https://a:b@api.example.test"})));
+test("requires sign-in",async()=>assert.rejects(()=>createDashboardGateway({baseUrl,fetchImpl:async()=>ok()}).readDashboard(),{code:"NOT_AUTHENTICATED"}));
+test("reads valid snapshot without storing token",async()=>{let call;const gateway=createDashboardGateway({baseUrl,fetchImpl:async(url,opts)=>{call={url,opts};return ok()}});const result=await gateway.readDashboard({view:"10min",getAccessToken:async()=>"synthetic-token"});assert.equal(result.revision,"r1");assert.match(call.url,/view=10min/);assert.equal(call.opts.credentials,"omit");assert.equal(call.opts.cache,"no-store")});
+test("rejects invalid view",async()=>assert.rejects(()=>createDashboardGateway({baseUrl}).readDashboard({view:"oops"}),TypeError));
+test("401 becomes session error",async()=>assert.rejects(()=>createDashboardGateway({baseUrl,fetchImpl:async()=>new Response("",{status:401})}).readDashboard({getAccessToken:async()=>"token"}),{code:"NOT_AUTHENTICATED"}));
+test("network errors are not success",async()=>assert.rejects(()=>createDashboardGateway({baseUrl,fetchImpl:async()=>{throw Error("offline")}}).readDashboard({getAccessToken:async()=>"token"}),{code:"NETWORK"}));
+test("rejects HTML response",async()=>assert.rejects(()=>createDashboardGateway({baseUrl,fetchImpl:async()=>new Response("<html>",{status:200,headers:{"content-type":"text/html"}})}).readDashboard({getAccessToken:async()=>"token"}),{code:"INVALID_RESPONSE"}));
+test("rejects malformed JSON shape",async()=>assert.rejects(()=>createDashboardGateway({baseUrl,fetchImpl:async()=>new Response("{}",{status:200,headers:{"content-type":"application/json"}})}).readDashboard({getAccessToken:async()=>"token"}),{code:"INVALID_RESPONSE"}));
