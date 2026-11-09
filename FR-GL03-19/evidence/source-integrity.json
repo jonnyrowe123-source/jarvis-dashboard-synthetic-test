@@ -1,0 +1,172 @@
+{
+  "baseline_commit": "2183ef2d833e2804062b671fa42c51ca4d30cdeb",
+  "vision_commit": "ad3cf09e44b99b5824fbe4f082bbb94fe8208d91",
+  "original_files_verified_unchanged": 41,
+  "new_synthetic_adapter_exact_copy": true,
+  "files": [
+    {
+      "path": ".github/workflows/synthetic-tests.yml",
+      "sha": "0c6631d28ef5f9c2c80a80e2a4511a4a5d18dcbd"
+    },
+    {
+      "path": ".github/workflows/vision-integration.yml",
+      "sha": "69d1c581fefffe9bc529c5c04bd91dbcb45baeef"
+    },
+    {
+      "path": "FR-GL03-12/FR-GL03-12-PACKAGE.zip",
+      "sha": "07de721b5b365e790d07375318649bd2aa97f727"
+    },
+    {
+      "path": "FR-GL03-12/FR-GL03-12-REPORT.md",
+      "sha": "9db2ae28e80ec61e833a4a8e3742efbc0c8a580e"
+    },
+    {
+      "path": "FR-GL03-12/FR-GL03-12-RETURN.md",
+      "sha": "75794a9104af8cdba687610d6072041bbdf8a78e"
+    },
+    {
+      "path": "FR-GL03-12/FR-GL03-12-VERIFICATION.txt",
+      "sha": "8216a32818ddf4b4ea7e0138909a273554921f3b"
+    },
+    {
+      "path": "FR-GL03-12/SHA256SUMS.txt",
+      "sha": "2c95446a1fc5781b02214f783e16e9f2cfa9450e"
+    },
+    {
+      "path": "FR-GL03-12/source/FR-GL03-12-REPORT.md",
+      "sha": "9db2ae28e80ec61e833a4a8e3742efbc0c8a580e"
+    },
+    {
+      "path": "FR-GL03-12/source/FR-GL03-12-RETURN.md",
+      "sha": "75794a9104af8cdba687610d6072041bbdf8a78e"
+    },
+    {
+      "path": "FR-GL03-12/source/OIDC-DESIGN.md",
+      "sha": "52ee26af89b4ef7ed4e5305851e95a2800d4b2d3"
+    },
+    {
+      "path": "FR-GL03-12/source/README.md",
+      "sha": "fe96269269b61049910a00185f930f50005c1e17"
+    },
+    {
+      "path": "FR-GL03-12/source/SHA256SUMS.json",
+      "sha": "647e46577fa7b438fd565a10168be845ac3d5472"
+    },
+    {
+      "path": "FR-GL03-12/source/baseline/README.md",
+      "sha": "831c0f0572f0167fe1ee1b5600f5455b675385e5"
+    },
+    {
+      "path": "FR-GL03-12/source/baseline/SHA256SUMS.json",
+      "sha": "f184af27324c7f667909f39cdd8ac34eb40f3a7b"
+    },
+    {
+      "path": "FR-GL03-12/source/baseline/read-only-adapter.mjs",
+      "sha": "71880310d94c327d821f777d5f5b955a8bd014c1"
+    },
+    {
+      "path": "FR-GL03-12/source/baseline/server.mjs",
+      "sha": "a9e07cb9bbe101f6aab882b7d8e74fe37964f323"
+    },
+    {
+      "path": "FR-GL03-12/source/baseline/server.test.mjs",
+      "sha": "694990e275813bb3109c3985c0de8bd8adc1700a"
+    },
+    {
+      "path": "FR-GL03-12/source/evidence/baseline-tests.txt",
+      "sha": "861a3dd94dbf2505ecbbc1cececaa9758ed8b17f"
+    },
+    {
+      "path": "FR-GL03-12/source/evidence/before-after.txt",
+      "sha": "7a0e0275c15ab92c355473cff94d77d94db5522f"
+    },
+    {
+      "path": "FR-GL03-12/source/evidence/final-tests.txt",
+      "sha": "45659954bc4f12143b2c3b47721c55c359045964"
+    },
+    {
+      "path": "FR-GL03-12/source/evidence/npm-test.txt",
+      "sha": "4f7edef216637f812b4baeb5107f71d5b05f5ead"
+    },
+    {
+      "path": "FR-GL03-12/source/legacy.test.mjs",
+      "sha": "694990e275813bb3109c3985c0de8bd8adc1700a"
+    },
+    {
+      "path": "FR-GL03-12/source/package.json",
+      "sha": "bf25b8326e516ca2ac3de78a8b27ef72d912a30e"
+    },
+    {
+      "path": "FR-GL03-12/source/pkce.mjs",
+      "sha": "45a9f5394a85d102ad12fc55da7f6c86febd8d38"
+    },
+    {
+      "path": "FR-GL03-12/source/pkce.test.mjs",
+      "sha": "97f5a12ab626ecf6e26acab5f6eecb3ed8af327e"
+    },
+    {
+      "path": "FR-GL03-12/source/read-only-adapter.mjs",
+      "sha": "71880310d94c327d821f777d5f5b955a8bd014c1"
+    },
+    {
+      "path": "FR-GL03-12/source/security.test.mjs",
+      "sha": "701989008f9b47519c3ee9f5bfbd0d0727c9f5b6"
+    },
+    {
+      "path": "FR-GL03-12/source/server.mjs",
+      "sha": "ea92e76a495a452be68624e870ffbf776e604e0f"
+    },
+    {
+      "path": "FR-GL03-12/source/verify.py",
+      "sha": "048d3a459b526bbf1bd002286964033bda01cfe7"
+    },
+    {
+      "path": "README.md",
+      "sha": "c40f8215fc617f178d27177128f3be1f98ad1e51"
+    },
+    {
+      "path": "docs/FR-GL03-09-SECURE-BACKEND-CONTRACT.md",
+      "sha": "f6f3c5b63fbcddba13a6c9d90ba6a9664c9bc0d1"
+    },
+    {
+      "path": "docs/FR-GL03-10-READONLY-ADAPTER.md",
+      "sha": "f31d9caada5cefbf7a6fd4d223ff2eff045f3280"
+    },
+    {
+      "path": "docs/FR-GL03-13-FRONTEND-GATEWAY.md",
+      "sha": "4a715675bfd899f10f49f86ebc7d896a2b97fc11"
+    },
+    {
+      "path": "docs/FR-GL03-17-INDEPENDENT-INTEGRATION-REPORT.md",
+      "sha": "3363c9a7d3e74e517d7928de3653a1e84b718874"
+    },
+    {
+      "path": "index.html",
+      "sha": "7422966c435b93683c3d7443c5df3150bf168b53"
+    },
+    {
+      "path": "prototype/dashboard-gateway.mjs",
+      "sha": "9546b2236190a2e1d0c3d367ba8fcc5398c05a02"
+    },
+    {
+      "path": "prototype/dashboard-gateway.test.mjs",
+      "sha": "c9f212a8444bb0e19a30748b2991c70c3ded2006"
+    },
+    {
+      "path": "prototype/hardened-integration.test.mjs",
+      "sha": "e1385045d9b68b539427e6e24d274ba6e1adaa74"
+    },
+    {
+      "path": "prototype/integration-readonly.test.mjs",
+      "sha": "c1bf5d9a4df4d66847ebcf86de136f8a5faa42df"
+    },
+    {
+      "path": "prototype/read-only-adapter.mjs",
+      "sha": "5dd5c5f5330acad89c2a2939c2ae184114e4cc20"
+    },
+    {
+      "path": "prototype/read-only-adapter.test.mjs",
+      "sha": "e3437d221d3fd20953fc09f09260ebbaa7e4d1a7"
+    }
+  ]
+}

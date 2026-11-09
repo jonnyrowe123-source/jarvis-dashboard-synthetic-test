@@ -1,0 +1,11 @@
+{
+  "version": "0.0.0",
+  "name": "fr-gl03-19-oidc-resource-server-prototype",
+  "dependencies": {
+    "jose": {
+      "version": "6.2.16",
+      "resolved": "https://registry.npmjs.org/jose/-/jose-6.2.16.tgz",
+      "overridden": false
+    }
+  }
+}

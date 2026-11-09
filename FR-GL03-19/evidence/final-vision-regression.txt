@@ -1,0 +1,39 @@
+✔ rejects non-TLS origin (1.310826ms)
+✔ rejects URL credentials (0.137948ms)
+✔ requires sign-in (0.817862ms)
+✔ reads valid snapshot without storing token (31.315558ms)
+✔ rejects invalid view (0.317789ms)
+✔ 401 becomes session error (0.382246ms)
+✔ network errors are not success (0.53134ms)
+✔ rejects HTML response (0.394304ms)
+✔ rejects malformed JSON shape (0.732474ms)
+✔ 17.1 real HTTP gateway fetches hardened synthetic fixture (32.244107ms)
+✔ 17.2 Lenovo filter honored by actual hardened server (8.0894ms)
+✔ 17.3 wrong authentication fails closed as session error (4.720743ms)
+✔ 17.4 no token means no request is made (0.818854ms)
+✔ 17.5 network outage fails closed (0.408716ms)
+✔ 17.6 browser preflight allows only approved read-only header (8.41484ms)
+✔ 17.7 authenticated HTTP write is denied (2.763184ms)
+✔ 17.8 current FR-GL03-10 richer adapter is incompatible and rejected with 502 (3.641727ms)
+✔ 17.9 gateway maps incompatible adapter response to server error (3.038358ms)
+✔ FR-GL03-14: overall read-only integration (29.710189ms)
+✔ FR-GL03-14: context filtering survives gateway (1.383414ms)
+✔ FR-GL03-14: offline fails closed (0.727476ms)
+✔ FR-GL03-14: expired fails closed (0.267613ms)
+✔ FR-GL03-14: forbidden fails closed (0.378961ms)
+✔ FR-GL03-14: html fails closed (0.426393ms)
+✔ FR-GL03-14: no write path on gateway (0.122815ms)
+✔ reads synthetic dashboard (1.396555ms)
+✔ view filters (0.230517ms)
+✔ rejects invalid view (1.388903ms)
+✔ rejects writes (0.355135ms)
+✔ rejects duplicate IDs (0.182465ms)
+✔ rejects malformed snapshot (0.17883ms)
+ℹ tests 31
+ℹ suites 0
+ℹ pass 31
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 404.264963
