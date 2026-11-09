@@ -6,6 +6,6 @@ test("reject unknown source fields",async()=>{const source=await createSynthetic
 test("reject unknown record fields",async()=>{const source=await createSyntheticReadOnlyAdapter().getDashboard();source.actions[0].secret="leak";assert.throws(()=>toVersionedSyntheticDTO(source))});
 test("reject duplicate record IDs",async()=>{const source=await createSyntheticReadOnlyAdapter().getDashboard();source.decisions[0].id=source.actions[0].id;assert.throws(()=>toVersionedSyntheticDTO(source))});
 test("reject unsupported schema",async()=>{const source=await createSyntheticReadOnlyAdapter().getDashboard();const dto=toVersionedSyntheticDTO(source);dto.schemaVersion=2;assert.throws(()=>validateVersionedSyntheticDTO(dto))});
-test("reject unsafe title",async()=>{const source=await createSyntheticReadOnlyAdapter().getDashboard();source.actions[0].title="bad\\nline";assert.throws(()=>toVersionedSyntheticDTO(source))});
+test("reject unsafe title",async()=>{const source=await createSyntheticReadOnlyAdapter().getDashboard();source.actions[0].title="bad\nline";assert.throws(()=>toVersionedSyntheticDTO(source))});
 test("reject unexpected state",async()=>{const source=await createSyntheticReadOnlyAdapter().getDashboard();source.actions[0].state="deleted";assert.throws(()=>toVersionedSyntheticDTO(source))});
 test("reject noninteger revision",async()=>{const source=await createSyntheticReadOnlyAdapter().getDashboard();source.actions[0].revision=1.5;assert.throws(()=>toVersionedSyntheticDTO(source))});
