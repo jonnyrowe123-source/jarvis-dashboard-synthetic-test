@@ -1,0 +1,42 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Vision · Versioned OIDC synthetic browser acceptance</title><style>
+:root{color-scheme:dark;font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:#0c1423;color:#edf2fc}
+*{box-sizing:border-box}body{margin:0}main{max-width:1000px;padding:28px 20px;margin:auto}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+h1{font-size:clamp(25px,4vw,38px);margin:6px 0}h2{font-size:20px}h3{font-size:16px}
+.eyebrow{font-size:12px;letter-spacing:.12em;color:#90b7de;font-weight:700}.tag{border:1px solid #486a85;border-radius:20px;padding:8px;font-size:12px;color:#b4e4fa}
+p{color:#bdcadd;line-height:1.5}.notice{padding:13px 16px;border-radius:12px;border:1px solid #577191;background:#19324b;margin:20px 0}
+.controls{display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin:22px 0}select,button{padding:12px;border-radius:9px;background:#20344e;color:#fff;border:1px solid #55718d;font:inherit;min-height:44px}
+select:focus-visible,button:focus-visible{outline:3px solid #90cfff}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.panel{padding:20px;background:#16253b;border:1px solid #35475f;border-radius:14px;margin-bottom:16px}
+ul{list-style:none;padding:0;margin:0}li{padding:14px 0;border-top:1px solid #344964}
+small{display:block;color:#a5b9ce;margin-top:5px}#status[data-status=ready]{color:#8ce6bc}#status[data-status=error]{color:#ffb0b0}#status[data-status=stale]{color:#ffd98a}
+</style></head><body><main><header><div><div class="eyebrow">VISION · FR-GL03-25</div><h1>Versioned dashboard acceptance</h1></div><span class="tag">SYNTHETIC · READ ONLY</span></header>
+<div class="notice">Isolated loopback browser test only. Fictional records and a short-lived, locally generated test access token. No production login, canonical Brain, storage or write endpoints.</div>
+<div class="controls"><label for="view">View</label><select id="view"><option value="overall">Overall</option><option value="10min">10 minutes</option><option value="lenovo">At Lenovo</option></select><button id="refresh">Refresh</button><button id="invalidate">Invalidate</button></div>
+<section class="panel" aria-live="polite"><h2>Connection</h2><p id="status" data-status="idle">Not loaded</p><p id="revision"></p></section>
+<div class="grid"><section class="panel"><h3>Actions</h3><ul id="actions"></ul></section><section class="panel"><h3>Decisions</h3><ul id="decisions"></ul></section></div><section class="panel"><h3>Warnings</h3><ul id="warnings"></ul></section>
+<script type="module">
+import {createVersionedDashboardGateway} from "./FR-GL03-23/source/versioned-gateway.mjs";
+import {createReadOnlyPresenter} from "./FR-GL03-23/source/readonly-presenter.mjs";
+import {validateDashboard} from "./FR-GL03-23/source/dashboard-contract.mjs";
+const byId=id=>document.getElementById(id), labels={idle:"Not loaded",loading:"Loading…",ready:"Versioned synthetic snapshot ready",stale:"Stale — refresh required",error:"Unavailable"};
+const status=byId("status");
+function fill(id,items){const ul=byId(id);ul.replaceChildren();if(!items.length){const li=document.createElement("li");li.textContent="No records";ul.append(li);return}for(const item of items.slice(0,5)){const li=document.createElement("li");li.textContent=typeof item==="string"?item:item.title;if(typeof item==="object"){const meta=document.createElement("small");meta.textContent="ID "+item.id+" | revision "+item.revision+" | state "+item.state+(item.context?" | "+item.context:"");li.append(meta)}ul.append(li)}}
+function render(state){status.dataset.status=state.status;status.textContent=labels[state.status]+(state.error?" — "+state.error:"");byId("revision").textContent=state.status==="ready"?"Snapshot "+state.revision:"No current snapshot";fill("actions",state.actions);fill("decisions",state.decisions);fill("warnings",state.warnings)}
+if(!["127.0.0.1","localhost"].includes(location.hostname)||typeof window.getSyntheticTestToken!=="function"){
+ status.dataset.status="error";status.textContent="Test harness unavailable outside the isolated browser session";
+}else{
+ try{
+  const response=await fetch("/_config",{cache:"no-store"});if(!response.ok)throw Error("No local configuration");
+  const config=await response.json();
+  const gateway=createVersionedDashboardGateway({baseUrl:config.apiOrigin,localTest:true});
+  const presenter=createReadOnlyPresenter({gateway,adaptPayload:validateDashboard});
+  presenter.subscribe(render);
+  const load=()=>presenter.load({view:byId("view").value,getAccessToken:window.getSyntheticTestToken});
+  byId("view").addEventListener("change",load);
+  byId("refresh").addEventListener("click",load);
+  byId("invalidate").addEventListener("click",()=>presenter.invalidate());
+  await load();
+ }catch{status.dataset.status="error";status.textContent="Synthetic test harness failed closed"}
+}
+</script></main></body></html>
