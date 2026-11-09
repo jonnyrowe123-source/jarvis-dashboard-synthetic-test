@@ -20,5 +20,9 @@ jobs:
         if: hashFiles('FR-GL03-19/source/package-lock.json') != ''
         working-directory: FR-GL03-19/source
         run: npm ci --ignore-scripts
+      - name: Install versioned API test dependency when present
+        if: hashFiles('FR-GL03-23/source/package-lock.json') != ''
+        working-directory: FR-GL03-23/source
+        run: npm ci --ignore-scripts
       - name: Run synthetic-only tests
         run: node --test prototype/*.test.mjs
