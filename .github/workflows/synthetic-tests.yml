@@ -10,11 +10,15 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '24'
+      - name: Install locked OIDC prototype dependency on this integration branch
+        if: github.ref == 'refs/heads/vision/fr-gl03-22-oidc-synthetic-integration'
+        working-directory: FR-GL03-19/source
+        run: npm ci --ignore-scripts
       - name: Run synthetic-only tests
         run: node --test prototype/*.test.mjs
