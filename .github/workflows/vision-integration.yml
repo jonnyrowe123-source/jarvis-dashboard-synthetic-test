@@ -1,0 +1,28 @@
+name: Vision synthetic integration acceptance
+on:
+  push:
+    branches:
+      - vision/fr-gl03-17-synthetic-integration
+    paths:
+      - 'prototype/**'
+      - 'FR-GL03-12/**'
+      - '.github/workflows/vision-integration.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  synthetic-integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Verify Codex extracted SHA256 manifest
+        run: python3 FR-GL03-12/source/verify.py
+      - name: Independently rerun hardened API suite
+        working-directory: FR-GL03-12/source
+        run: npm test
+      - name: Run Vision gateway and hardened HTTP integration suite
+        run: node --test prototype/*.test.mjs
