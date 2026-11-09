@@ -1,0 +1,24 @@
+name: FR-GL03-25 independent versioned API acceptance
+on:
+  push:
+    branches: [vision/fr-gl03-25-versioned-independent-acceptance]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  acceptance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install pinned candidate dependencies
+        working-directory: FR-GL03-23/source
+        run: npm ci --ignore-scripts
+      - name: Re-run original candidate regression
+        working-directory: FR-GL03-23/source
+        run: npm test
+      - name: Run independent versioned HTTP and presenter acceptance
+        run: node --test prototype/versioned-independent-acceptance.test.mjs
