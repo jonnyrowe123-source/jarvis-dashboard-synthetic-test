@@ -84,3 +84,10 @@ test("26.21 valid browser CORS preflight does not expose any data",()=>withApi(a
  assert.equal(response.status,204);
  assert.equal(await response.text(),"");
 }));
+
+test("26.22 successful, denied and malformed requests are not cacheable",()=>withApi(async({base,issuer})=>{
+ for(const token of [await issuer.sign(),await issuer.sign({scope:"other:read"}),null]){
+  const response=await get(base,token);
+  assert.equal(response.headers.get("cache-control"),"no-store");
+ }
+}));
