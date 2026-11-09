@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import {createServer} from "node:http";
 import {readFile} from "node:fs/promises";
 import {chromium} from "playwright";
-import {makeOidcServer} from "../FR-GL03-23/source/server.mjs";
+import {makeOidcServer} from "../FR-GL03-25/server.mjs";
 import {localIssuer} from "../FR-GL03-23/source/test-issuer.mjs";
 const previewPath=new URL("../fr23-loopback-preview.html",import.meta.url);
 const safeModules=new Set(["dashboard-contract.mjs","versioned-dto.mjs","versioned-gateway.mjs","readonly-presenter.mjs"]);
