@@ -1,0 +1,16 @@
+import test from "node:test";import assert from "node:assert/strict";
+import {createReadOnlyPresenter,renderReadOnlyDashboard} from "./readonly-presenter.mjs";
+import {createSyntheticReadOnlyAdapter} from "./read-only-adapter.mjs";
+import {toVersionedSyntheticDTO} from "./versioned-dto.mjs";
+const fixture=()=>createSyntheticReadOnlyAdapter().getDashboard();
+const make=(readDashboard=fixture,adaptPayload=toVersionedSyntheticDTO)=>createReadOnlyPresenter({gateway:{readDashboard},adaptPayload});
+test("starts idle and read-only",()=>{const p=make();assert.equal(p.getState().status,"idle");assert.equal(p.getState().readOnly,true);assert.equal(p.transition,undefined)});
+test("loads versioned synthetic data",async()=>{const p=make();assert.equal(await p.load(),true);assert.equal(p.getState().status,"ready");assert.equal(p.getState().actions.length,2);assert.equal(p.getState().revision,"synthetic-1")});
+test("clears records on failed refresh",async()=>{let fail=false;const p=make(async()=>{if(fail)throw {code:"NETWORK"};return fixture()});await p.load();fail=true;await p.load();assert.equal(p.getState().status,"error");assert.equal(p.getState().actions.length,0)});
+test("session error is generic",async()=>{const p=make(async()=>{throw {code:"NOT_AUTHENTICATED",message:"secret"} });await p.load();assert.equal(p.getState().error,"Sign in required");assert.equal(p.getState().actions.length,0)});
+test("unknown error does not expose payload",async()=>{const p=make(async()=>{throw Error("private token")});await p.load();assert.equal(p.getState().error,"Dashboard unavailable")});
+test("stale response cannot override newer request",async()=>{let finish;const p=make(()=>new Promise(resolve=>{finish=resolve}));const pending=p.load();p.invalidate();finish(await fixture());assert.equal(await pending,false);assert.equal(p.getState().status,"stale")});
+test("unsupported schema rejected without displaying data",async()=>{const p=make(fixture,raw=>({...toVersionedSyntheticDTO(raw),schemaVersion:2}));await p.load();assert.equal(p.getState().status,"error");assert.equal(p.getState().actions.length,0)});
+test("invalid view rejected",async()=>{const p=make();await assert.rejects(()=>p.load({view:"bad"}),TypeError)});
+test("subscribe emits and unsubscribe stops",async()=>{const p=make();let calls=0;const off=p.subscribe(()=>calls++);await p.load();off();p.invalidate();assert.equal(calls,2)});
+test("render uses textContent, not HTML injection",async()=>{const root={children:[],replaceChildren(){this.children=[]},append(x){this.children.push(x)}};const documentRef={createElement(tag){return {tag,textContent:"",children:[],append(x){this.children.push(x)}}}};const p=make();await p.load();renderReadOnlyDashboard({root,state:p.getState(),documentRef});assert.ok(root.children.some(x=>x.tag==="h2"));assert.ok(root.children.every(x=>!Object.hasOwn(x,"innerHTML")))});
