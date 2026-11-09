@@ -1,0 +1,26 @@
+name: FR-GL03-22 isolated OIDC integration acceptance
+on:
+  push:
+    branches: [vision/fr-gl03-22-oidc-synthetic-integration]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  synthetic-integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install locked prototype authentication library
+        working-directory: FR-GL03-19/source
+        run: npm ci --ignore-scripts
+      - name: Preserve OIDC prototype regressions
+        working-directory: FR-GL03-19/source
+        run: npm test
+      - name: Run Vision isolated authenticated integration tests
+        run: node --test prototype/oidc-synthetic-bridge.test.mjs
+      - name: Run existing Vision source and integration regression
+        run: node --test prototype/*.test.mjs
