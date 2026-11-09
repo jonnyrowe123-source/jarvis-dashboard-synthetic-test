@@ -13,6 +13,8 @@ export function createFictionalReadPolicy({snapshotSource,subjectTenants}={}){
  if(!snapshotSource||typeof snapshotSource.getDashboard!=="function"||!keys(subjectTenants,["fictional-alice","fictional-bob"])||!identity(subjectTenants["fictional-alice"])||!identity(subjectTenants["fictional-bob"]))throw new TypeError("Explicit fictional policy required");
  return Object.freeze({async read({principal,view="overall"}={}){
   checkPrincipal(principal);
+  // An authenticated but unknown subject must be denied, not treated as an empty dashboard.
+  if(!Object.hasOwn(subjectTenants,principal.subject))fail();
   if(!["overall","10min","lenovo"].includes(view))fail();
   const source=await snapshotSource.getDashboard();
   if(!keys(source,["revision","actions","decisions","warnings"])||typeof source.revision!=="string"||!Array.isArray(source.actions)||!Array.isArray(source.decisions)||!Array.isArray(source.warnings))fail();
