@@ -1,0 +1,40 @@
+name: FR-GL03-25 independent versioned OIDC browser acceptance
+on:
+  push:
+    branches: [vision/fr-gl03-25-versioned-browser-integration]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  versioned-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install FR-GL03-23 locked OIDC and schema test dependencies
+        working-directory: FR-GL03-23/source
+        run: npm ci --ignore-scripts
+      - name: Install preserved FR-GL03-19 test dependencies
+        working-directory: FR-GL03-19/source
+        run: npm ci --ignore-scripts
+      - name: Independent candidate regression
+        working-directory: FR-GL03-23/source
+        run: npm test
+      - name: Independent unchanged Vision prototype regression
+        run: node --test prototype/*.test.mjs
+      - name: Install isolated browser acceptance dependency
+        run: npm install --no-save --no-package-lock playwright@1.56.1
+      - name: Install browser runtime
+        run: npx playwright install --with-deps chromium
+      - name: Chromium authenticated versioned dashboard acceptance
+        run: node prototype/fr23-browser-acceptance.mjs
+      - name: Upload mobile screenshot
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fr-gl03-25-versioned-browser
+          path: fr-gl03-25-versioned-browser.png
+          if-no-files-found: ignore
