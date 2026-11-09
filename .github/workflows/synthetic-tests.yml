@@ -20,5 +20,13 @@ jobs:
         if: github.ref == 'refs/heads/vision/fr-gl03-22-oidc-synthetic-integration'
         working-directory: FR-GL03-19/source
         run: npm ci --ignore-scripts
+      - name: Install OIDC prototype dependencies on this isolated acceptance branch
+        if: github.ref == 'refs/heads/vision/fr-gl03-25-versioned-independent-acceptance'
+        working-directory: FR-GL03-19/source
+        run: npm ci --ignore-scripts
+      - name: Install versioned candidate dependencies on this isolated acceptance branch
+        if: github.ref == 'refs/heads/vision/fr-gl03-25-versioned-independent-acceptance'
+        working-directory: FR-GL03-23/source
+        run: npm ci --ignore-scripts
       - name: Run synthetic-only tests
         run: node --test prototype/*.test.mjs
