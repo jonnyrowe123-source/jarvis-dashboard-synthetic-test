@@ -1,0 +1,58 @@
+--- FR-GL03-19/source/server.mjs
++++ FR-GL03-23/source/server.mjs
+@@ -1,18 +1,11 @@
+ import {createServer} from 'node:http';
++import {encodeDashboard} from './dashboard-contract.mjs';
+ import {createOidcAuthenticator} from './oidc-auth.mjs';
+ import {timingSafeEqual} from 'node:crypto';
+ import {pathToFileURL} from 'node:url';
+-import {createSyntheticReadOnlyAdapter} from './read-only-adapter.mjs';
++import {createSyntheticReadOnlyAdapter} from './synthetic-versioned-adapter.mjs';
+ 
+ // Synthetic data only. OIDC mode verifies access tokens; no login/session issuance.
+-function validDashboard(value) {
+- const exact=(v,keys)=>v&&typeof v==='object'&&!Array.isArray(v)&&Object.keys(v).length===keys.length&&keys.every(k=>Object.hasOwn(v,k));
+- const text=v=>typeof v==='string'&&v.length<=512&&!/[\x00-\x1f\x7f]/.test(v);
+- return exact(value,['revision','source','actions','decisions','warnings'])&&text(value.revision)&&value.source==='synthetic-fixture'
+-  &&Array.isArray(value.actions)&&value.actions.length<=100&&value.actions.every(a=>exact(a,['id','title','context'])&&text(a.id)&&text(a.title)&&['10min','lenovo'].includes(a.context))
+-  &&Array.isArray(value.decisions)&&value.decisions.length<=100&&value.decisions.every(d=>exact(d,['id','title'])&&text(d.id)&&text(d.title))
+-  &&Array.isArray(value.warnings)&&value.warnings.length<=100&&value.warnings.every(text);
+-}
+ export function makeServer({token, authenticationMode='synthetic', oidc, origin='http://localhost:4173', adapter=createSyntheticReadOnlyAdapter(), adapterTimeoutMs=500, maxInFlight=16}={}) {
+  if(!['synthetic','oidc'].includes(authenticationMode))throw Error('Explicit supported authentication mode required');
+  if(authenticationMode==='synthetic'&&(oidc!==undefined||process.env.NODE_ENV==='production'))throw Error('Synthetic authentication forbidden in production or OIDC configuration');
+@@ -67,11 +60,7 @@
+    const operation=Promise.resolve().then(()=>adapter.getDashboard(view)).finally(()=>{inFlight--;});
+    try {
+     const result=await Promise.race([operation,new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('timeout')),adapterTimeoutMs);})]);
+-    // Bound the fixture structure before serialization. The adapter is trusted local code.
+-    // Production schema validation awaits the actual contract.
+-    if(!validDashboard(result)) return send(502,{error:'upstream_failure'});
+-    const encoded=JSON.stringify(result);
+-    if(!encoded||Buffer.byteLength(encoded)>65536) return send(502,{error:'upstream_failure'});
++    const encoded=encodeDashboard(result,{view});
+     res.writeHead(200,headers);res.end(encoded);
+    } catch {send(502,{error:'upstream_failure'});} finally {clearTimeout(timer);}
+   } catch {send(500,{error:'internal_error'});}
+--- FR-GL03-19/source/security.test.mjs
++++ FR-GL03-23/source/security.test.mjs
+@@ -2,7 +2,7 @@
+ import assert from 'node:assert/strict';
+ import net from 'node:net';
+ import {makeServer} from './server.mjs';
+-import {createSyntheticReadOnlyAdapter} from './read-only-adapter.mjs';
++import {createSyntheticReadOnlyAdapter} from './synthetic-versioned-adapter.mjs';
+ const token='synthetic-test-token-1234567890'; // Public fixture, never a credential.
+ const auth={Authorization:`Bearer ${token}`};
+ async function run(fn,options={}){const s=makeServer({token,...options});await new Promise(r=>s.listen(0,'127.0.0.1',r));try{await fn(`http://127.0.0.1:${s.address().port}`,s);}finally{s.closeAllConnections();await new Promise(r=>s.close(r));}}
+--- FR-GL03-19/source/oidc-api.test.mjs
++++ FR-GL03-23/source/oidc-api.test.mjs
+@@ -6,7 +6,7 @@
+ import {usingIssuer} from './test-issuer.mjs';
+ async function withApi(f,fn,overrides={}){const s=makeOidcServer({oidc:f.config,...overrides});await new Promise(r=>s.listen(0,'127.0.0.1',r));try{return await fn(`http://127.0.0.1:${s.address().port}`,s);}finally{s.closeAllConnections();await new Promise(r=>s.close(r));}}
+ const headers=token=>({Authorization:'Bearer '+token});
+-test('OIDC authenticated API preserves exact synthetic response',()=>usingIssuer(async f=>withApi(f,async base=>{const token=await f.sign();for(const view of ['overall','10min','lenovo']){const r=await fetch(base+'/v1/dashboard?view='+view,{headers:headers(token)});assert.equal(r.status,200);const data=await r.json();assert.equal(data.source,'synthetic-fixture');assert.equal(data.revision,'synthetic-1');assert.deepEqual(Object.keys(data).sort(),['actions','decisions','revision','source','warnings']);}})));
++test('OIDC authenticated API preserves exact synthetic response',()=>usingIssuer(async f=>withApi(f,async base=>{const token=await f.sign();for(const view of ['overall','10min','lenovo']){const r=await fetch(base+'/v1/dashboard?view='+view,{headers:headers(token)});assert.equal(r.status,200);const data=await r.json();assert.equal(data.schemaVersion,1);assert.equal(data.actions[0].revision,1);assert.equal(data.actions[0].state,'open');assert.equal(data.source,'synthetic-fixture');assert.equal(data.revision,'synthetic-1');assert.deepEqual(Object.keys(data).sort(),['actions','decisions','revision','schemaVersion','source','warnings']);}})));
+ test('anonymous and synthetic tokens fail in OIDC mode',()=>usingIssuer(async f=>withApi(f,async base=>{for(const auth of [undefined,'synthetic-test-token-1234567890']){const r=await fetch(base+'/v1/dashboard',{headers:auth?headers(auth):{}});assert.equal(r.status,401);assert.equal(r.headers.get('www-authenticate'),'Bearer');assert.deepEqual(await r.json(),{error:'unauthenticated'});}assert.equal(f.state.requests,0);})));
+ test('verified but unauthorized identity gets 403 with no claims',()=>usingIssuer(async f=>withApi(f,async base=>{for(const claims of [{sub:'fictional-bob'},{scope:'actions:read'}]){const r=await fetch(base+'/v1/dashboard',{headers:headers(await f.sign(claims))});assert.equal(r.status,403);assert.deepEqual(await r.json(),{error:'forbidden'});}})));
+ test('provider failure is redacted 503, not authentication success',()=>usingIssuer(async f=>{f.state.status=503;return withApi(f,async base=>{const r=await fetch(base+'/v1/dashboard',{headers:headers(await f.sign())});assert.equal(r.status,503);assert.equal(r.headers.get('retry-after'),'1');assert.equal(r.headers.get('cache-control'),'no-store');assert.deepEqual(await r.json(),{error:'authentication_unavailable'});});}));

@@ -1,0 +1,38 @@
+{
+  "version": "0.0.0",
+  "name": "fr-gl03-23-versioned-dashboard-api",
+  "dependencies": {
+    "ajv": {
+      "version": "8.20.0",
+      "resolved": "https://registry.npmjs.org/ajv/-/ajv-8.20.0.tgz",
+      "overridden": false,
+      "dependencies": {
+        "fast-deep-equal": {
+          "version": "3.1.3",
+          "resolved": "https://registry.npmjs.org/fast-deep-equal/-/fast-deep-equal-3.1.3.tgz",
+          "overridden": false
+        },
+        "fast-uri": {
+          "version": "3.1.9",
+          "resolved": "https://registry.npmjs.org/fast-uri/-/fast-uri-3.1.9.tgz",
+          "overridden": false
+        },
+        "json-schema-traverse": {
+          "version": "1.0.0",
+          "resolved": "https://registry.npmjs.org/json-schema-traverse/-/json-schema-traverse-1.0.0.tgz",
+          "overridden": false
+        },
+        "require-from-string": {
+          "version": "2.0.2",
+          "resolved": "https://registry.npmjs.org/require-from-string/-/require-from-string-2.0.2.tgz",
+          "overridden": false
+        }
+      }
+    },
+    "jose": {
+      "version": "6.2.16",
+      "resolved": "https://registry.npmjs.org/jose/-/jose-6.2.16.tgz",
+      "overridden": false
+    }
+  }
+}

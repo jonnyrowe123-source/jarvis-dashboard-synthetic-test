@@ -1,0 +1,18 @@
+✔ starts idle and read-only (1.836771ms)
+✔ loads versioned synthetic data (0.837323ms)
+✔ clears records on failed refresh (0.31402ms)
+✔ session error is generic (0.34728ms)
+✔ unknown error does not expose payload (0.176544ms)
+✔ stale response cannot override newer request (0.303995ms)
+✔ unsupported schema rejected without displaying data (0.255162ms)
+✔ invalid view rejected (0.418416ms)
+✔ subscribe emits and unsubscribe stops (0.32061ms)
+✔ render uses textContent, not HTML injection (0.590354ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 75.092703

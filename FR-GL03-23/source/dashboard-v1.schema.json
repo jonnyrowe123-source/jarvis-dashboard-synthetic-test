@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:jarvis:dashboard:synthetic:v1",
+  "$comment": "Shared executable validator additionally enforces global record-ID uniqueness, requested-view consistency, well-formed Unicode and the 65536-byte UTF-8 JSON response cap. Array order is semantically significant.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "revision",
+    "source",
+    "actions",
+    "decisions",
+    "warnings"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "integer",
+      "const": 1
+    },
+    "revision": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[^\\u0000-\\u001f\\u007f\\ud800-\\udfff]+$",
+      "maxLength": 128
+    },
+    "source": {
+      "const": "synthetic-fixture"
+    },
+    "actions": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "title",
+          "revision",
+          "state",
+          "context"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[-A-Za-z0-9_]{1,64}$"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^[^\\u0000-\\u001f\\u007f\\ud800-\\udfff]+$",
+            "maxLength": 200
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "state": {
+            "const": "open"
+          },
+          "context": {
+            "enum": [
+              "10min",
+              "lenovo"
+            ]
+          }
+        }
+      }
+    },
+    "decisions": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "title",
+          "revision",
+          "state"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[-A-Za-z0-9_]{1,64}$"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^[^\\u0000-\\u001f\\u007f\\ud800-\\udfff]+$",
+            "maxLength": 200
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "state": {
+            "const": "open"
+          }
+        }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "pattern": "^[^\\u0000-\\u001f\\u007f\\ud800-\\udfff]+$",
+        "maxLength": 512
+      }
+    }
+  }
+}

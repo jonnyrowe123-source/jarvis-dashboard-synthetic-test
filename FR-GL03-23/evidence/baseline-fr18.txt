@@ -1,0 +1,20 @@
+✔ rich adapter maps to versioned DTO (2.860924ms)
+✔ reject unknown source fields (0.294972ms)
+✔ reject unknown record fields (0.295172ms)
+✔ reject duplicate record IDs (0.287891ms)
+✔ reject unsupported schema (0.222483ms)
+✔ reject unsafe title (0.284486ms)
+✔ reject unexpected state (0.18739ms)
+✔ reject noninteger revision (0.15379ms)
+✔ versioned bridge reads richer FR-GL03-10 fixture over hardened HTTP (32.897907ms)
+✔ versioned bridge rejects unknown fields before transport (5.516099ms)
+✔ versioned bridge rejects duplicate IDs (3.569535ms)
+✔ bridge has no write methods (0.216985ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 12
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 210.301266
