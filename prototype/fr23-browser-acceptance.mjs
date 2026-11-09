@@ -33,10 +33,14 @@ try{
  const context=await browser.newContext({viewport:{width:1280,height:800}});
  const page=await context.newPage(),runtimeErrors=[],apiGetRequests=[];
  page.on("pageerror",e=>runtimeErrors.push(e.message));
+ page.on("console",m=>{if(m.type()==="error")console.log("BROWSER CONSOLE ERROR:",m.text())});
+ page.on("requestfailed",r=>console.log("BROWSER REQUEST FAILED:",r.url(),r.failure()?.errorText));
  page.on("request",r=>{if(r.url().includes("/v1/dashboard")&&r.method()==="GET")apiGetRequests.push({url:r.url(),headers:r.headers()})});
  let token=await issuer.sign();
  await page.exposeFunction("getSyntheticTestToken",async()=>token);
  await page.goto(webOrigin+"/fr23-loopback-preview.html",{waitUntil:"networkidle"});
+ await page.waitForTimeout(500);
+ console.log("BROWSER INITIAL STATUS:",await page.locator("#status").innerText(),"RUNTIME:",JSON.stringify(runtimeErrors));
  await page.locator("#status[data-status=ready]").waitFor({timeout:10000});
  assert.equal(await page.locator("#actions li").count(),2);
  assert.equal(await page.locator("#decisions li").count(),1);
