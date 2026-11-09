@@ -1,0 +1,33 @@
+name: Synthetic preview Chromium acceptance
+on:
+  push:
+    branches: [vision/fr-gl03-20-synthetic-demo]
+    paths:
+      - 'synthetic-preview.html'
+      - 'prototype/**'
+      - '.github/workflows/browser-acceptance.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install isolated browser test dependency
+        run: npm install --no-save --no-package-lock playwright@1.56.1
+      - name: Install Chromium for Playwright
+        run: npx playwright install --with-deps chromium
+      - name: Run actual browser acceptance
+        run: node prototype/browser-acceptance.mjs
+      - name: Upload screenshot
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: synthetic-preview-browser
+          path: synthetic-preview-acceptance.png
+          if-no-files-found: ignore
