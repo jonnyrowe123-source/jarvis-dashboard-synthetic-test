@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><title>Jarvis — Synthetic Read-only Preview</title>
+<style>
+:root{font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#e8eef8;background:#0d1627;color-scheme:dark}
+*{box-sizing:border-box}body{margin:0;min-height:100vh}main{max-width:1080px;margin:auto;padding:32px 20px}
+header{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+h1{margin:0;font-size:clamp(26px,4vw,40px);letter-spacing:-.04em}h2{margin:0 0 8px;font-size:20px}h3{font-size:17px;margin:0 0 12px}
+p{color:#b7c5d9;line-height:1.5}.eyebrow{color:#88a6cc;font-weight:700;letter-spacing:.12em;font-size:11px}
+.tag{background:#193551;color:#a5e2ff;padding:7px 11px;border-radius:30px;font-size:12px}
+.notice{border:1px solid #355477;background:#142b42;padding:12px 16px;border-radius:12px;margin:22px 0}
+.controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:20px 0}
+button,select{border:1px solid #506583;border-radius:9px;padding:11px 14px;background:#1d2e46;color:#f0f5fc;font:inherit;cursor:pointer}
+button:hover{background:#29405d}button:focus-visible,select:focus-visible{outline:3px solid #80ccff}
+button:disabled{opacity:.55;cursor:wait}label{font-size:14px;color:#c6d3e4}
+.panel{border:1px solid #32445d;border-radius:16px;background:#152239;padding:22px;margin:16px 0}
+#status{font-weight:700;margin:0 0 12px}#status[data-status="ready"]{color:#8bdfb1}#status[data-status="error"]{color:#ffb1b1}#status[data-status="stale"]{color:#ffd48a}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+ul{list-style:none;padding:0;margin:0}li{padding:13px 0;border-top:1px solid #32445d}li small{display:block;color:#9eb0c9;margin-top:4px}
+.empty{color:#91a6c2}.foot{font-size:12px;margin-top:25px}
+</style></head><body><main>
+<header><div><div class="eyebrow">VISION / FR-GL03-20</div><h1>Jarvis dashboard preview</h1></div><span class="tag">SYNTHETIC · READ ONLY</span></header>
+<p>Standalone demonstration of the versioned read-only presentation layer. All records are fictional. No login, real Jarvis data, persistent storage or write operations.</p>
+<div class="notice">This page is an isolated design preview, not the live Home OS dashboard. Action and decision controls are intentionally absent.</div>
+<div class="controls"><label for="view">Dashboard view</label><select id="view"><option value="overall">Overall</option><option value="10min">10 minutes</option><option value="lenovo">At Lenovo</option></select><button id="refresh">Refresh synthetic data</button><button id="offline">Simulate outage</button><button id="invalidate">Mark stale</button></div>
+<section class="panel" aria-live="polite"><h2>Connection status</h2><p id="status" data-status="idle">Not loaded</p><p id="revision"></p></section>
+<div class="grid"><section class="panel"><h3>Top actions</h3><ul id="actions"></ul></section><section class="panel"><h3>Top decisions</h3><ul id="decisions"></ul></section></div>
+<section class="panel"><h3>Warnings</h3><ul id="warnings"></ul></section>
+<p class="foot">Source: FR-GL03-10 synthetic adapter → FR-GL03-18 strict versioned DTO → FR-GL03-16 read-only presenter. No server connection.</p>
+</main><script type="module">
+import {createReadOnlyPresenter} from "./prototype/readonly-presenter.mjs";
+import {createSyntheticReadOnlyAdapter} from "./prototype/read-only-adapter.mjs";
+import {toVersionedSyntheticDTO} from "./prototype/versioned-dto.mjs";
+const byId=id=>document.getElementById(id);
+const fixture=createSyntheticReadOnlyAdapter();
+let outage=false;
+const presenter=createReadOnlyPresenter({gateway:{async readDashboard({view}){if(outage)throw {code:"NETWORK"};return fixture.getDashboard(view)}},adaptPayload:toVersionedSyntheticDTO});
+const statusLabels={idle:"Not loaded",loading:"Loading synthetic records…",ready:"Synthetic snapshot ready",stale:"Snapshot stale — refresh required",error:"Unavailable"};
+function fillList(id,items,kind){const target=byId(id);target.replaceChildren();if(items.length===0){const li=document.createElement("li");li.className="empty";li.textContent="No "+kind+" to display";target.append(li);return}
+for(const item of items.slice(0,5)){const li=document.createElement("li");li.textContent=item.title||item; if(typeof item==="object"){const detail=document.createElement("small");detail.textContent="Synthetic ID: "+item.id;li.append(detail)}target.append(li)}}
+presenter.subscribe(state=>{const status=byId("status");status.dataset.status=state.status;status.textContent=statusLabels[state.status]+(state.error?" — "+state.error:"");byId("revision").textContent=state.status==="ready"?"Snapshot revision: "+state.revision:"No current confirmed snapshot";fillList("actions",state.actions,"actions");fillList("decisions",state.decisions,"decisions");fillList("warnings",state.warnings,"warnings");});
+async function load(){await presenter.load({view:byId("view").value})}
+byId("refresh").addEventListener("click",()=>{outage=false;load()});
+byId("offline").addEventListener("click",()=>{outage=true;load()});
+byId("invalidate").addEventListener("click",()=>presenter.invalidate());
+byId("view").addEventListener("change",()=>{outage=false;load()});
+load();
+</script></body></html>
