@@ -1,0 +1,29 @@
+name: FR-GL03-17 isolated synthetic integration
+on:
+  push:
+    branches:
+      - vision/fr-gl03-17-integration
+    paths:
+      - 'FR-GL03-12/**'
+      - 'FR-GL03-17/**'
+      - '.github/workflows/fr-gl03-17-integration.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  isolated-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Verify Codex source hashes
+        working-directory: FR-GL03-12/source
+        run: python3 verify.py
+      - name: Run Codex synthetic security suite
+        working-directory: FR-GL03-12/source
+        run: node --test *.test.mjs
+      - name: Run Vision combined synthetic integration suite
+        run: node --test FR-GL03-17/integration.test.mjs
