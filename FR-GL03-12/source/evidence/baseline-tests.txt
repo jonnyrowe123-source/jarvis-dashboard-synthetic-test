@@ -1,0 +1,17 @@
+✔ health does not expose records (41.660234ms)
+✔ anonymous dashboard denied (7.676037ms)
+✔ wrong token denied (5.204473ms)
+✔ synthetic authenticated dashboard (4.685601ms)
+✔ writes denied even with token (8.831218ms)
+✔ CORS is allowlisted (4.383631ms)
+✔ unknown view denied (3.172661ms)
+✔ duplicate query denied (2.376682ms)
+✔ preflight denied (3.5375ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 279.464506

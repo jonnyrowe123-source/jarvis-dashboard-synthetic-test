@@ -1,0 +1,23 @@
+{
+  "FR-GL03-12-REPORT.md": "9c35001055a22417a2ad3f9d80d18f3ff59573808565707ea7a805aeb0c98c0f",
+  "FR-GL03-12-RETURN.md": "fcd258fa2a119b59ad0805000a456f5af58731da0d852ad4defd056e8f1eb0fa",
+  "OIDC-DESIGN.md": "3dc649536761705ddbeace46c1f4c34702292a4c89163a45b79454a71ba424db",
+  "README.md": "d22c6fc444465a6fedb5ee29954346af93539ca63ff762310673520e6dcb3c8c",
+  "baseline/README.md": "52a51176cf19646fb815018e1bcec8e030fc572f24c621e6e82009cd61042caa",
+  "baseline/SHA256SUMS.json": "a61075878b3f84689359bb6b1dc67212fef73ded64680c6b41a7c3bf35297045",
+  "baseline/read-only-adapter.mjs": "2f97c68254b6ffd4e3d20a8c4204d006a256a1c92dd156c9f56779dccc3a1cf4",
+  "baseline/server.mjs": "593acbcbf465aab43d30efb3e6e8737d44b798a368ed4d73c9eeddc2d71a4582",
+  "baseline/server.test.mjs": "93dbb6706de713cc864f3007f3c7f5abea6eaffc553e8deff0da7c95e67f60d3",
+  "evidence/baseline-tests.txt": "7e4ceca4bb372274e04e02d7e920593cabbcaaf639bd1fec3fc7a515944b61ec",
+  "evidence/before-after.txt": "1c60efe8a0c68fb403fec00bac84c0db5b54971b0ebac35d407dc34e7ec5ad33",
+  "evidence/final-tests.txt": "73f1df8426378e336b46f91839c0c79544c02f47c67c18ba4dba53fe147171c7",
+  "evidence/npm-test.txt": "88550f922210850d4dd78a9f9fbb84faca563ed4a34256cdd2e372948a99e2cd",
+  "legacy.test.mjs": "93dbb6706de713cc864f3007f3c7f5abea6eaffc553e8deff0da7c95e67f60d3",
+  "package.json": "13d2abb70a6ca244b7724457a60f98ea28ff01f09acd05808114256a14202a4b",
+  "pkce.mjs": "d26d57a57840795f6127c421b791c2b2c2f5f036e0b2ea9ed116ee6a8cd589e5",
+  "pkce.test.mjs": "ddda7859c9a64807c4c0aaeee8b2d3bcbf9cb47f045cbc37b026200c54b6bf6d",
+  "read-only-adapter.mjs": "2f97c68254b6ffd4e3d20a8c4204d006a256a1c92dd156c9f56779dccc3a1cf4",
+  "security.test.mjs": "bec5bf91dab6786b131791bef567e7f56d7b0b21cd8167c173c22aa4a1f5add6",
+  "server.mjs": "e9912d755d86778ecff1453e3cee604b40d02e60bbb4cb918a0169af727f99f4",
+  "verify.py": "9300787c0e6a757d8f7e515c20682d84a20b67e7e70442a363372d3ac7cf03d1"
+}

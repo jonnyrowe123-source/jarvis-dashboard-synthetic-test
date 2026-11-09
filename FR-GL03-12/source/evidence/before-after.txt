@@ -1,0 +1,8 @@
+original: empty view: HTTP 200
+original: encoded query key: HTTP 200
+original: disallowed origin: HTTP 200
+original: valid browser preflight: HTTP 403
+hardened: empty view: HTTP 400
+hardened: encoded query key: HTTP 400
+hardened: disallowed origin: HTTP 403
+hardened: valid browser preflight: HTTP 204

@@ -1,0 +1,85 @@
+
+> fr-gl03-12-synthetic-api-hardening@0.0.0 test
+> node --test *.test.mjs
+
+✔ health does not expose records (30.1881ms)
+✔ anonymous dashboard denied (6.008196ms)
+✔ wrong token denied (3.761944ms)
+✔ synthetic authenticated dashboard (3.850827ms)
+✔ writes denied even with token (3.916216ms)
+✔ CORS is allowlisted (2.646384ms)
+✔ unknown view denied (2.529989ms)
+✔ duplicate query denied (2.435847ms)
+✔ preflight denied (2.562427ms)
+✔ RFC 7636 S256 vector (1.302852ms)
+✔ PKCE fresh independent material and lengths (4.089277ms)
+✔ PKCE invalid inputs rejected (0.477079ms)
+✔ strict query: view= (43.410724ms)
+✔ strict query: view=bad (8.00948ms)
+✔ strict query: view=overall&view=lenovo (5.331468ms)
+✔ strict query: view=overall& (3.492129ms)
+✔ strict query: x=overall (2.980358ms)
+✔ strict query: %76iew=overall (2.969491ms)
+✔ strict query: view=%6fverall (2.944173ms)
+✔ strict query: view=overall;view=lenovo (2.485943ms)
+✔ strict query: view=%ZZ (5.283876ms)
+✔ strict query: view=%FF (4.381347ms)
+✔ strict query: view=overall?x (2.01868ms)
+✔ method POST denied (2.39087ms)
+✔ method PUT denied (2.335257ms)
+✔ method PATCH denied (2.203748ms)
+✔ method DELETE denied (2.030247ms)
+✔ method HEAD denied (2.985495ms)
+✔ invalid authentication empty (2.68952ms)
+✔ invalid authentication bearer (2.5636ms)
+✔ invalid authentication Bearer (2.640246ms)
+✔ invalid authentication Basic (2.462358ms)
+✔ invalid authentication Bearer (2.580145ms)
+✔ security headers on success and errors (5.580743ms)
+✔ allowed preflight (2.234224ms)
+✔ origin denied null (4.839027ms)
+✔ origin denied https://evil.example (3.384577ms)
+✔ origin denied http://localhost:4173.evil.example (1.489453ms)
+✔ preflight rejects requested write and extra header (5.982809ms)
+✔ oversized URI (1.679228ms)
+✔ duplicate auth (2.093852ms)
+✔ duplicate origin (1.649534ms)
+✔ body (1.475001ms)
+✔ chunked (1.4547ms)
+✔ oversized header (1.642453ms)
+✔ continue (1.300548ms)
+✔ conflicting framing (1.202341ms)
+✔ target http://evil.example/health (1.455291ms)
+✔ target //evil.example/health (1.433519ms)
+✔ target /v1/../health (1.173217ms)
+✔ target /health#fragment (1.193357ms)
+✔ target /health\other (1.404124ms)
+✔ adapter failure redacted (6.542782ms)
+✔ invalid or oversized adapter result fails closed (2.805795ms)
+✔ invalid or oversized adapter result fails closed (3.210184ms)
+✔ invalid or oversized adapter result fails closed (3.894965ms)
+✔ invalid or oversized adapter result fails closed (1.79318ms)
+✔ concurrent independent views (27.410021ms)
+✔ timeout bounds response and retains concurrency slot until settlement (25.247631ms)
+✔ concurrency slot recovers after rejection (5.292359ms)
+✔ configuration fails closed (0.447845ms)
+✔ transport limits configured (0.124528ms)
+✔ extra adapter fields cannot disclose data (1.611716ms)
+✔ cyclic adapter output redacted (2.254975ms)
+✔ pending work saturates then recovers (2.740557ms)
+✔ malformed HTTP rejected by parser (0.96332ms)
+✔ bounded valid structure still respects UTF-8 byte cap (6.462341ms)
+✔ duplicate query rejected before adapter call (3.368692ms)
+ℹ tests 68
+ℹ suites 0
+ℹ pass 68
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 634.918444
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
