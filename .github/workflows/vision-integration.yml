@@ -19,6 +19,23 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
+      - name: Verify outer delivery ZIP and report digests
+        working-directory: FR-GL03-12
+        run: sha256sum -c SHA256SUMS.txt
+      - name: Verify ZIP CRC and safe membership
+        run: |
+          python3 - <<'PY'
+          import zipfile
+          from pathlib import PurePosixPath
+          p='FR-GL03-12/FR-GL03-12-PACKAGE.zip'
+          with zipfile.ZipFile(p) as z:
+              names=z.namelist()
+              assert len(names)==22, f'Unexpected member count {len(names)}'
+              assert len(set(names))==len(names), 'Duplicate ZIP member'
+              assert all(not PurePosixPath(n).is_absolute() and '..' not in PurePosixPath(n).parts for n in names)
+              assert z.testzip() is None, 'CRC failure'
+          print('PASS: 22 unique safe ZIP members and CRC')
+          PY
       - name: Verify Codex extracted SHA256 manifest
         run: python3 FR-GL03-12/source/verify.py
       - name: Independently rerun hardened API suite
