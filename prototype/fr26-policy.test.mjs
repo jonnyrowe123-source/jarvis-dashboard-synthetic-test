@@ -54,3 +54,7 @@ test("26.9 output does not expose ACL information or source tenancy",async()=>{
 test("26.10 policy exposes no mutation or write method",()=>{
  const p=policy();assert.deepEqual(Object.keys(p),["read"]);assert.equal(p.write,undefined);assert.equal(p.transitionAction,undefined);
 });
+
+test("26.11 authenticated but unrecognised principal is never an empty success",async()=>{
+ await assert.rejects(()=>policy().read({principal:principal("fictional-outside")}),TypeError);
+});
