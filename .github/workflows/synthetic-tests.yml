@@ -16,8 +16,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - name: Install locked OIDC prototype dependency on this integration branch
-        if: github.ref == 'refs/heads/vision/fr-gl03-22-oidc-synthetic-integration'
+      - name: Install locked OIDC dependency when synthetic integration tests exist
+        if: hashFiles('FR-GL03-19/source/package-lock.json') != ''
         working-directory: FR-GL03-19/source
         run: npm ci --ignore-scripts
       - name: Run synthetic-only tests
