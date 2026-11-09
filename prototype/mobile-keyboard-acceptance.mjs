@@ -26,7 +26,7 @@ try{
  await page.keyboard.press("Enter");
  await page.locator("#status[data-status=ready]").waitFor();
  console.log("PASS keyboard: view then refresh focus order and activation");
- await page.locator("#view").focus();await page.keyboard.press("l");await page.keyboard.press("Enter");
+ await page.locator("#view").focus();await page.keyboard.press("End");await page.keyboard.press("Tab");
  await page.locator("#status[data-status=ready]").waitFor();
  assert.equal(await page.locator("#view").inputValue(),"lenovo");
  assert.equal(await page.locator("#actions li").count(),1);
